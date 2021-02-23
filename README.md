@@ -40,3 +40,88 @@
 ## 使用方法
 
 ## 发展
+### 一、创建应用
+  首先，我们需要一个key，类似于获得使用高德api的资格，因此要去官网注册，点击[高德地图官网](https://developer.amap.com/)进入
+![](https://github.com/ysh1356542512/redrock_winter_homework/blob/main/show_1.png)
+  点击右上角头像进入应用管理 点击我的应用，创建新应用
+![](https://github.com/ysh1356542512/redrock_winter_homework/blob/main/show_3.png)
+  新建应用
+  ![](https://github.com/ysh1356542512/redrock_winter_homework/blob/main/show_4.png)
+  点击添加key
+  ![](https://github.com/ysh1356542512/redrock_winter_homework/blob/main/show_5.png)
+  你会需要三个值，发布版安全码SHA1、调试版安全码SHA1、PackageName。
+#### ①获得packageName
+这个在你的android工程中可以找到 具体如下
+picture1
+#### ②获得调试版安全码
+具体的方法有很多种 我就讲我用的吧
+* 按window+R  输入cmd 进入控制台
+  picture2
+* 在弹出的控制台窗口中输入 cd .android 定位到 .android 文件夹
+* 调试版本使用 debug.keystore，命令为：keytool -list -v -keystore debug.keystore 发布版本使用 apk 对应的 keystore，命令为：keytool -list -v -keystore apk的keystore 如下所示：
+* 提示输入密钥库密码，调试版本默认密码是 android，发布版本的密码是为 apk 的 keystore 设置的密码。输入密钥后回车（如果没设置密码，可直接回车），此时可在控制台显示的信息中获取 Sha1 值，如下图所示：
+#### ③获得发布版安全码SHA1
+  和调试版本不一样的是 发布版还需要一个jks文件 需要在android工程里新建
+ * 点击Build 选择点击Generate Signed Bundle / APK…
+ * 选择APK，然后Next
+ * 然后是配置，这里需要填写jks的路径，但是我没有这个jks，因此点击**Create new,**按钮去创建一个。
+ * 首先要指定这个jks的文件存放路径和文件名。
+ * 这里我存放在D盘下的APK文件夹中，然后设置jks的名字为GaodeMapDemo，然后点击OK。
+ * 会弹出这样一个窗口，不用管它，点击OK。
+ * 勾选记住密码，然后点击Next。
+ * 选择release，然后两个都勾选上，最后点击Finish。
+ * 在你的AS中查看这个apk，你可以复制它通过电脑QQ发给你的手机，然后在手机上直接打开安装
+ * 然后点击确认后 会显示你的key
+#### ④关于bug和可能遇到的错误
+  大部分都是我自己实操的时候遇到的错误 还有我自己去网上找解决方法 最终还是自己赌一把给搞定了 hai 具体的等我以后再写 现在先把readme
+  写完
+### 二、配置Android Studio工程
+#### ①导入SDK
+首先要下载SDK，点击[SDK下载](https://developer.amap.com/api/android-location-sdk/download)
+复制这些文件到你的libs下。然后点击这个小象图标进行工程的资源配置同步。
+最终如下图所示，你可以看到你的这个jar现在是可以打开的。
+然后打开你的app下的build.gradle文件，在android闭包下添加
+#### ② 配置AndroidManifest.xml
+打开AndroidManifest.xml，首先在application标签下添加定位服务
+然后添加在manifest标签下添加如下权限。
+最后在application标签下添加高德的访问key
+这个值和你创建的key的值一致
+### 三、获取当前定位信息
+#### ① 动态权限请求
+打开app下的build.gradle，在dependencies闭包下添加如下依赖：
+#### ② 初始化定位
+首先在newActivity中新增两个成员变量
+然后新增一个initLocation()方法
+#### ③ 获取定位结果
+### 四、显示地图
+添加mapview
+<com.amap.api.maps.MapView
+        android:id="@+id/map_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+        
+ 然后增加地图生命周期的管理方法。
+### 五、显示当前定位地图
+将定位结果和地图结合
+现在newActivity中新增两个成员变量
+然后新增一个initMap()方法，用于初始化地图
+然后重写里面的两个方法在activate()和deactivate()。
+### 六、地图设置
+主要是设置一些自定义图标 比例尺 缩放比例
+### 七、获取POI数据
+实现poi搜索
+首先先在app的build.gradle中添加依赖
+然后添加一个queryPOI()方法，这个方法对应了xml中浮动按钮的onClick的值。
+下面就要实现PoiSearch.OnPoiSearchListener
+然后重写里面的onPoiSearched和onPoiItemSearched，方法如下
+### 八、地理编码和逆地理编码
+#### ①逆地理编码
+逆地理编码就是将坐标转为地址，坐标刚才已经拿到了，就是经纬度
+首先在newActivity中创建两个对象。
+然后在initMap()中构建对象，然后设置监听。之后实现这个GeocodeSearch.OnGeocodeSearchListener
+重写里面的两个方法。一个是地址转坐标，一个是坐标转地址
+通过经纬度构建LatLonPoint对象，然后构建RegeocodeQuery时，传入，并且输入另外两个参数，范围和坐标系。最后通过geocodeSearch发起一个异步的地址获取请求。
+#### ② 地理编码
+同理 进入到onGeocodeSearched方法
+### 九、marker和改变中心点
+① 添加标点Marker
