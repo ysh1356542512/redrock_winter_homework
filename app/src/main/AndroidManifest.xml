@@ -19,8 +19,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MapDemo">
-        <activity android:name=".FirstFragmentActivity"
-            android:windowSoftInputMode="adjustNothing"></activity>
+        <activity android:name=".RouteDetailActivity"
+            android:theme = "@style/DetailTheme">
+        </activity>
+        <activity
+            android:name=".FirstFragmentActivity"
+            android:windowSoftInputMode="adjustNothing" />
         <activity android:name=".newActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,8 +32,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RouteActivity"></activity>
-        <!-- 定位service -->
+        <activity android:name=".RouteActivity" /> <!-- 定位service -->
         <service android:name="com.amap.api.location.APSService" /> <!-- 设置高德Key -->
         <meta-data
             android:name="com.amap.api.v2.apikey"
