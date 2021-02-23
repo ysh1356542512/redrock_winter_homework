@@ -9,8 +9,8 @@ import androidx.lifecycle.LiveData;
 import java.util.List;
 
 public class PoiPlaceRepository {
-    private LiveData<List<PoiPlace>> allPoiPlacesLive;
-    private PoiPlaceDao poiPlaceDao;
+    private final LiveData<List<PoiPlace>> allPoiPlacesLive;
+    private final PoiPlaceDao poiPlaceDao;
     public PoiPlaceRepository(Context context){
         PoiPlaceDatabase poiPlaceDatabase = PoiPlaceDatabase.getDatabase(context.getApplicationContext());
         poiPlaceDao = poiPlaceDatabase.getPoiPlaceDao();
@@ -21,7 +21,7 @@ public class PoiPlaceRepository {
         return allPoiPlacesLive;
     }
     static class InsertAsyncTask extends AsyncTask<PoiPlace,Void,Void> {
-        private PoiPlaceDao poiPlaceDao;
+        PoiPlaceDao poiPlaceDao;
         public InsertAsyncTask(PoiPlaceDao poiPlaceDao){
             this.poiPlaceDao = poiPlaceDao;
         }

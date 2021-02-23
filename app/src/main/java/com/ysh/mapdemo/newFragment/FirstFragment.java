@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -103,10 +104,11 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
     private ImageView poi_iv,poi_ivzb,poi_ivstar,poi_ivShare,poi_ivCar;
     private Button mBtn1,mBtn2;
     private ImageButton mIBtn3;
-
+    private Boolean isStar;
     private PoiPlaceRepository poiPlaceRepository;
     private PoiPlaceViewModel poiPlaceViewModel;
-
+    private LiveData<List<PoiPlace>> filterdPoiPlaces;
+    private List<PoiPlace> allPoiPlaces,allPoiPlaces1;
     private Button mBtn;
 
     private LatLng mLatLng;
@@ -185,17 +187,18 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        poiPlaceRepository = new PoiPlaceRepository(getActivity());
-        initPoiView();
+        poiPlaceRepository = new PoiPlaceRepository(requireContext());
+        poiPlaceViewModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.AndroidViewModelFactory(getActivity().getApplication())).get(PoiPlaceViewModel.class);
+                initPoiView();
         initPoiListener();
-        mBtn = getView().findViewById(R.id.button);
-        mBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), newActivity.class);
-                startActivity(intent);
-            }
-        });
+//        mBtn = getView().findViewById(R.id.button);
+//        mBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(getActivity(), newActivity.class);
+//                startActivity(intent);
+//            }
+//        });
         searchTv = getView().findViewById(R.id.first_search_tv);
         searchIv = getView().findViewById(R.id.first_search_iv);
         fabClearMarker = getView().findViewById(R.id.fab_clear_marker);
@@ -227,7 +230,7 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
             mess = bundle.getString("data");
         }
         searchTv.setText(normalBean.str);
-        Toast.makeText(getActivity(), mess, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(), mess, Toast.LENGTH_SHORT).show();
         searchTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -252,10 +255,23 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
 
         initListener();
         initRoute();
-        if(normalBean.str.equals(" ")){
-            Toast.makeText(getActivity(),"ttt",Toast.LENGTH_SHORT).show();
+        if(normalBean.str.equals("查找地点、公交、地铁")){
+//            Toast.makeText(getActivity(),"ttt",Toast.LENGTH_SHORT).show();
         }else{
             updateAddress();
+        }
+        if(normalBean.lat!=181){
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    updateMapCenter(new LatLng(normalBean.lat,normalBean.lon));
+                    addMarker(new LatLng(normalBean.lat,normalBean.lon));
+                    normalBean.lat = 181;
+                    normalBean.lon = 181;
+                }
+            };
+            Timer timer = new Timer();
+            timer.schedule(task, 3000);//3秒后执行TimeTask的run方法
         }
 
     }
@@ -279,10 +295,11 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
         mIBtn3 = getView().findViewById(R.id.first_poi_shtdn);
         constraintLayout1.setVisibility(View.INVISIBLE);
         constraintLayout2.setVisibility(View.INVISIBLE);
-
-        poi_ivstar.setOnClickListener(new View.OnClickListener() {
+        mIBtn3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                clearAllMarker();
+                normalBean.str = "查找地点、公交、地铁";
             }
         });
     }
@@ -492,6 +509,8 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
         GeocodeQuery query = new GeocodeQuery(normalBean.str,cityCode);//城市编码);
         Log.d("String",toString().valueOf(cityCode));
         geocodeSearch.getFromLocationNameAsyn(query);
+        normalBean.str = "查找地点、公交、地铁";
+        searchTv.setText("查找地点、公交、地铁");
     }
 //    protected void doSearchQuery(String key) {
 //        currentPage = 0;
@@ -523,7 +542,7 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
         //改变位置
         aMap.animateCamera(cameraUpdate);
-        aMap.addMarker(new MarkerOptions().position(latLng).snippet("DefaultMarker"));
+
     }
     /**
      * 坐标转地址
@@ -533,11 +552,21 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
     @SuppressLint("SetTextI18n")
     @Override
     public void onRegeocodeSearched(RegeocodeResult regeocodeResult, int rCode) {
+        filterdPoiPlaces = poiPlaceRepository.getAllPoiPlacesLive();
+//        for(int i = 0;i<allPoiPlaces.size();i++){
+//            if(mLatLng.equals(new LatLng(allPoiPlaces.get(i).getLat(), allPoiPlaces.get(i).getLon()))){
+//                poi_ivstar.setImageResource(R.drawable.poi_star_fill);
+//                isStar=true;
+//            }else{
+//                isStar=false;
+//            }
+//        }
+        isStar=false;
         //解析result获取地址描述信息
         if(rCode == PARSE_SUCCESS_CODE){
             RegeocodeAddress regeocodeAddress = regeocodeResult.getRegeocodeAddress();
             //显示解析后的地址
-            showMsg("地址："+regeocodeAddress.getFormatAddress());
+//            showMsg("地址："+regeocodeAddress.getFormatAddress());
             float distance = AMapUtils.calculateLineDistance(mLatLng,MyLatLng);
             float qianmifload = distance/1000;
             qianmifload = BigDecimal.valueOf(qianmifload)
@@ -546,8 +575,11 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
             //显示浮动按钮
             clearMarker();
             fabClearMarker.show();
-            poi_address.setText(regeocodeAddress.getFormatAddress());
-            Toast.makeText(getActivity(),regeocodeAddress.getFormatAddress(),Toast.LENGTH_SHORT).show();
+            poi_address.setText(regeocodeAddress.getProvince()+regeocodeAddress.getCity()+regeocodeAddress.getDistrict()+
+                    regeocodeAddress.getTownship() +regeocodeAddress.getStreetNumber().getStreet()
+                    +regeocodeAddress.getStreetNumber().getNumber()+regeocodeAddress.getNeighborhood()+
+                    regeocodeAddress.getBuilding());
+//            Toast.makeText(getActivity(),regeocodeAddress.getFormatAddress(),Toast.LENGTH_SHORT).show();
 //            +regeocodeAddress.getStreetNumber().getStreet()+regeocodeAddress.getStreetNumber().getNumber()
 
             start_route.show();
@@ -555,14 +587,13 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
 //            Marker marker;
             if(qianmifload>1){
                 poi_distance.setText("距您"+String.valueOf(qianmifload)+"千米");
-                marker = aMap.addMarker(new MarkerOptions().draggable(true).position(mLatLng).title(regeocodeAddress.getFormatAddress()+regeocodeAddress.getStreetNumber().getStreet()+regeocodeAddress.getStreetNumber().getNumber()).snippet("距您"+String.valueOf(qianmifload)+"千米"));
             }else {
                 poi_distance.setText("距您"+(int) distance + "米");
-                marker = aMap.addMarker(new MarkerOptions().draggable(true).position(mLatLng).title(regeocodeAddress.getFormatAddress()).snippet("距您"+(int) distance + "米"));
             }
-            marker.showInfoWindow();
+            marker = aMap.addMarker(new MarkerOptions().draggable(true).position(mLatLng));
+//            marker.showInfoWindow();
             //设置标点的绘制动画效果
-            Animation animation = new RotateAnimation(marker.getRotateAngle(),marker.getRotateAngle()+180,0,0,0);
+            Animation animation = new RotateAnimation(marker.getRotateAngle(),marker.getRotateAngle()+360,0,0,0);
             long duration = 1000L;
             animation.setDuration(duration);
             animation.setInterpolator(new LinearInterpolator());
@@ -572,7 +603,123 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
             markerList.add(marker);
             constraintLayout1.setVisibility(View.VISIBLE);
             constraintLayout2.setVisibility(View.VISIBLE);
-
+//            poi_ivstar.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    if(isStar){
+//
+//                                for(int j = 0;j<allPoiPlaces.size();j++){
+//                                    if(allPoiPlaces.get(j).getAddress().equals(regeocodeAddress.getStreetNumber().getStreet()+regeocodeAddress.getStreetNumber().getNumber())){
+//                                        poiPlaceRepository.deletePoiPlaces(allPoiPlaces.get(j));
+//                                    }
+//                                }
+//                                isStar=false;
+//                                poi_ivstar.setImageResource(R.drawable.first_icon_star);
+//                    }else{
+//
+//                        poiPlaceRepository.insertPoiPlaces(new PoiPlace("1",regeocodeAddress.getProvince()+regeocodeAddress.getCity()
+//                                +regeocodeAddress.getDistrict()+
+//                                regeocodeAddress.getTownship() +regeocodeAddress.getStreetNumber().getStreet()
+//                                +regeocodeAddress.getStreetNumber().getNumber()+regeocodeAddress.getNeighborhood()+
+//                                regeocodeAddress.getBuilding(),mLatLng.latitude,mLatLng.longitude));
+//                        isStar=true;
+//                        poi_ivstar.setImageResource(R.drawable.poi_star_fill);
+//                    }
+//                }
+//            });
+            filterdPoiPlaces.observe(getViewLifecycleOwner(), new Observer<List<PoiPlace>>() {
+                @Override
+                public void onChanged(List<PoiPlace> poiPlaces) {
+                    allPoiPlaces = poiPlaces;
+                    for(int i = 0;i<allPoiPlaces.size();i++){
+                        if(allPoiPlaces.get(i).getAddress().equals(regeocodeAddress.getProvince()+regeocodeAddress.getCity()
+                                +regeocodeAddress.getDistrict()+
+                                regeocodeAddress.getTownship() +regeocodeAddress.getStreetNumber().getStreet()
+                                +regeocodeAddress.getStreetNumber().getNumber()+regeocodeAddress.getNeighborhood()+
+                                regeocodeAddress.getBuilding())){
+                            isStar = true;
+                            poi_ivstar.setImageResource(R.drawable.poi_star_fill);
+                            poi_star.setText("已收藏");
+                        }
+                    }
+                    poi_ivstar.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if(isStar){
+                                for(int j = 0;j<allPoiPlaces.size();j++){
+                                    if(allPoiPlaces.get(j).getAddress().equals(regeocodeAddress.getProvince()+regeocodeAddress.getCity()
+                                            +regeocodeAddress.getDistrict()+
+                                            regeocodeAddress.getTownship() +regeocodeAddress.getStreetNumber().getStreet()
+                                            +regeocodeAddress.getStreetNumber().getNumber()+regeocodeAddress.getNeighborhood()+
+                                            regeocodeAddress.getBuilding())){
+                                        poiPlaceRepository.deletePoiPlaces(allPoiPlaces.get(j));
+                                    }
+                                }
+                                isStar=false;
+                                poi_ivstar.setImageResource(R.drawable.first_icon_star);
+                                poi_star.setText("收藏");
+                            }else{
+//                                int count = 0;
+//                                for(int k = 0;k<allPoiPlaces.size();k++){
+//                                    if(allPoiPlaces.get(k).getAddress().equals(regeocodeAddress.getProvince()+regeocodeAddress.getCity()
+//                                            +regeocodeAddress.getDistrict()+
+//                                            regeocodeAddress.getTownship() +regeocodeAddress.getStreetNumber().getStreet()
+//                                            +regeocodeAddress.getStreetNumber().getNumber()+regeocodeAddress.getNeighborhood()+
+//                                            regeocodeAddress.getBuilding())){
+//
+//                                    }
+//                                }
+                                poiPlaceRepository.insertPoiPlaces(new PoiPlace("1",regeocodeAddress.getProvince()+regeocodeAddress.getCity()
+                                        +regeocodeAddress.getDistrict()+
+                                        regeocodeAddress.getTownship() +regeocodeAddress.getStreetNumber().getStreet()
+                                        +regeocodeAddress.getStreetNumber().getNumber()+regeocodeAddress.getNeighborhood()+
+                                        regeocodeAddress.getBuilding(),mLatLng.latitude,mLatLng.longitude));
+                                isStar=true;
+                                poi_ivstar.setImageResource(R.drawable.poi_star_fill);
+                                poi_star.setText("已收藏");
+                            }
+                        }
+                    });
+                    poi_star.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if(isStar){
+                                for(int j = 0;j<allPoiPlaces.size();j++){
+                                    if(mLatLng.equals(new LatLng(allPoiPlaces.get(j).getLat(),allPoiPlaces.get(j).getLon()))){
+                                        poiPlaceRepository.deletePoiPlaces(allPoiPlaces.get(j));
+                                    }
+                                }
+                                isStar=false;
+                            }else{
+                                poiPlaceRepository.insertPoiPlaces(new PoiPlace("1",regeocodeAddress.getProvince()+regeocodeAddress.getCity()+regeocodeAddress.getDistrict()+
+                                        regeocodeAddress.getTownship() +regeocodeAddress.getStreetNumber().getStreet()
+                                        +regeocodeAddress.getStreetNumber().getNumber()+regeocodeAddress.getNeighborhood()+
+                                        regeocodeAddress.getBuilding(),mLatLng.latitude,mLatLng.longitude));
+                                isStar=true;
+                            }
+                        }
+                    });
+                }
+            });
+//            poi_star.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    if(isStar){
+//                        for(int j = 0;j<allPoiPlaces.size();j++){
+//                            if(mLatLng.equals(new LatLng(allPoiPlaces.get(j).getLat(),allPoiPlaces.get(j).getLon()))){
+//                                poiPlaceRepository.deletePoiPlaces(allPoiPlaces.get(j));
+//                            }
+//                        }
+//                        isStar=false;
+//                    }else{
+//                        poiPlaceRepository.insertPoiPlaces(new PoiPlace("1",regeocodeAddress.getProvince()+regeocodeAddress.getCity()+regeocodeAddress.getDistrict()+
+//                                regeocodeAddress.getTownship() +regeocodeAddress.getStreetNumber().getStreet()
+//                                +regeocodeAddress.getStreetNumber().getNumber()+regeocodeAddress.getNeighborhood()+
+//                                regeocodeAddress.getBuilding(),mLatLng.latitude,mLatLng.longitude));
+//                        isStar=true;
+//                    }
+//                }
+//            });
         }else {
             showMsg("获取地址失败");
         }
@@ -601,7 +748,7 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
                 Timer timer = new Timer();
                 timer.schedule(task, 3000);//3秒后执行TimeTask的run方法
 
-                showMsg("坐标：" + latLonPoint.getLongitude()+"，"+latLonPoint.getLatitude());
+//                showMsg("坐标：" + latLonPoint.getLongitude()+"，"+latLonPoint.getLatitude());
             }
 
         } else {
@@ -731,6 +878,8 @@ AMap.OnMarkerClickListener,AMap.OnMarkerDragListener,AMap.InfoWindowAdapter{
 //        mEndPoint = convertToLatLonPoint(latLng);
 //        startRouteSearch();
         //添加标点
+        poi_ivstar.setImageResource(R.drawable.first_icon_star);
+        poi_star.setText("收藏");
         updateMapCenter(latLng);
         this.aMap.clear();
         addMarker(latLng);

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class PoiPlaceViewModel extends AndroidViewModel {
     private PoiPlaceDao poiPlaceDao;
-    private PoiPlaceRepository poiPlaceRepository;
+    private final PoiPlaceRepository poiPlaceRepository;
     public PoiPlaceViewModel(@NonNull Application application) {
         super(application);
         poiPlaceRepository = new PoiPlaceRepository(application);

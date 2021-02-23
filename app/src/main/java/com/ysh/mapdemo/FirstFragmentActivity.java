@@ -14,13 +14,16 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.amap.api.services.core.AMapException;
@@ -36,6 +39,8 @@ import com.ysh.mapdemo.Interface.OnRecyclerItemClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class FirstFragmentActivity extends AppCompatActivity implements PoiSearch.OnPoiSearchListener {
 
@@ -43,6 +48,9 @@ public class FirstFragmentActivity extends AppCompatActivity implements PoiSearc
     private RecyclerView listView;
     private Button mBtnSearch;
     private ImageView mIvBack;
+    private ProgressBar progressBar;
+    private ImageButton imageButton;
+
 
     private static final int REQUEST_PERMISSION_LOCATION = 0;
     private String keyWord = "";// 要输入的poi搜索关键字
@@ -62,7 +70,25 @@ public class FirstFragmentActivity extends AppCompatActivity implements PoiSearc
         setContentView(R.layout.activity_first_fragment);
         mEt_keyword = findViewById(R.id.forth_atCtv1);
         mIvBack = findViewById(R.id.return_back);
+        InputMethodManager imm2 = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+        imm2.showSoftInput(mEt_keyword,0);
+        progressBar = findViewById(R.id.progressBar);
+        imageButton = findViewById(R.id.imageButton);
+        mBtnSearch = findViewById(R.id.btn_seach);
+        progressBar.setVisibility(View.GONE);
+        imageButton.setVisibility(View.GONE);
+        mBtnSearch.setVisibility(View.GONE);
+
         mIvBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(),0);
+                Intent intent = new Intent(getApplicationContext(),newActivity.class);
+                startActivity(intent);
+            }
+        });
+        mBtnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
@@ -75,18 +101,10 @@ public class FirstFragmentActivity extends AppCompatActivity implements PoiSearc
                 startActivity(intent);
             }
         });
-        mBtnSearch = findViewById(R.id.btn_search);
-        mBtnSearch.setOnClickListener(new View.OnClickListener() {
+        imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(),0);
-                Intent intent = new Intent(getApplicationContext(),newActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("data", mEt_keyword.getText().toString());
-                intent.putExtra("index",bundle);
-                normalBean.str = mEt_keyword.getText().toString();
-                startActivity(intent);
+                mEt_keyword.setText("");
             }
         });
 
@@ -111,9 +129,14 @@ public class FirstFragmentActivity extends AppCompatActivity implements PoiSearc
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 keyWord = String.valueOf(charSequence);
                 if ("".equals(keyWord)) {
-                    Toast.makeText(getApplicationContext(),"请输入",Toast.LENGTH_SHORT).show();
+                    imageButton.setVisibility(View.GONE);
+                    mBtnSearch.setVisibility(View.GONE);
                     return;
                 } else {
+                    if(mEt_keyword.getText()!=null){
+                        imageButton.setVisibility(View.VISIBLE);
+                        mBtnSearch.setVisibility(View.VISIBLE);
+                    }
                     doSearchQuery(keyWord);
                     mEt_keyword.requestFocus();
                     InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);

@@ -16,7 +16,7 @@ public abstract class PoiPlaceDatabase extends RoomDatabase{
     static synchronized PoiPlaceDatabase getDatabase(Context context){
         if(INSTANCE == null){
             INSTANCE = Room.databaseBuilder(context.getApplicationContext(),PoiPlaceDatabase.class,"poiPlace_database")
-                    .fallbackToDestructiveMigration().build();
+                    .build();
         }
         return INSTANCE;
     }

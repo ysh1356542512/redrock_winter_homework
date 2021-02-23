@@ -1,5 +1,8 @@
 package com.ysh.mapdemo.Adapter;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +10,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
@@ -15,10 +19,13 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ysh.mapdemo.Interface.OnNormalItemClickListener;
+import com.ysh.mapdemo.Interface.OnRecyclerItemClickListener;
 import com.ysh.mapdemo.R;
 import com.ysh.mapdemo.Room.PoiPlace;
 import com.ysh.mapdemo.Room.PoiPlaceViewModel;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +33,12 @@ public class NormalAdapter extends ListAdapter<PoiPlace,NormalAdapter.NormalView
 //    List<PoiPlace> allPoiPlaces = new ArrayList<>();
     boolean useCardView;
     private PoiPlaceViewModel poiPlaceViewModel;
+    private OnNormalItemClickListener monItemClickListener;
+
+    //提供set方法供Activity或Fragment调用
+    public void setNormalItemClickListener(OnNormalItemClickListener listener){
+        monItemClickListener=listener;
+    }
 
     public NormalAdapter(boolean useCardView, PoiPlaceViewModel poiPlaceViewModel){
         super(new DiffUtil.ItemCallback<PoiPlace>() {
@@ -78,14 +91,23 @@ public class NormalAdapter extends ListAdapter<PoiPlace,NormalAdapter.NormalView
         return holder;
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull NormalViewHolder holder, int position) {
 //        if(position>=2) {
             PoiPlace poiPlace = getItem(position);
+        double qianmifload = poiPlace.getLat();
+        qianmifload = BigDecimal.valueOf(qianmifload)
+                .setScale(2, BigDecimal.ROUND_HALF_DOWN)
+                .doubleValue();
+        double qianmifload2 = poiPlace.getLon();
+        qianmifload2 = BigDecimal.valueOf(qianmifload2)
+                .setScale(2, BigDecimal.ROUND_HALF_DOWN)
+                .doubleValue();
             holder.itemView.setTag(R.id.word_for_view_holder,poiPlace);
-            holder.mIv1.setImageResource(R.drawable.amap_empty_search);
+            holder.mIv1.setImageResource(R.drawable.first_icon_star);
             holder.mTv2.setText(poiPlace.getAddress());
-            holder.mTv3.setText(String.valueOf(poiPlace.getLat()));
+            holder.mTv3.setText("经度:"+qianmifload+","+"纬度:"+qianmifload2);
             if(poiPlace.isLatInvisible()){
                 holder.mTv3.setVisibility(View.GONE);
                 holder.aSwitch.setChecked(true);
@@ -102,7 +124,7 @@ public class NormalAdapter extends ListAdapter<PoiPlace,NormalAdapter.NormalView
 //        return allPoiPlaces.size();
 //    }
 
-     public static class NormalViewHolder extends RecyclerView.ViewHolder{
+     public class NormalViewHolder extends RecyclerView.ViewHolder{
         TextView mTv1,mTv2,mTv3;
         ImageView mIv1;
         Switch aSwitch;
@@ -113,6 +135,15 @@ public class NormalAdapter extends ListAdapter<PoiPlace,NormalAdapter.NormalView
             mTv3 = itemView.findViewById(R.id.normal_tv2);
             mIv1 = itemView.findViewById(R.id.normal_number);
             aSwitch = itemView.findViewById(R.id.LatInvisiable);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (monItemClickListener!=null){
+
+                        monItemClickListener.onItemClick(getAdapterPosition());
+                    }
+                }
+            });
         }
     }
 }

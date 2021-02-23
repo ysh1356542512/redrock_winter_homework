@@ -3,8 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
-    android:background="#FFFFFF">
+    android:layout_height="70dp"
+    android:background="?attr/selectableItemBackground">
+
+    <View
+        android:id="@+id/view3"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#DDD"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <View
         android:id="@+id/divider"
@@ -21,14 +32,19 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout3"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        android:clickable="true"
-        android:foreground="?attr/selectableItemBackground"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline30"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline71"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.8" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline34"
@@ -51,10 +67,14 @@
             android:id="@+id/normal_tv1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:paddingRight="45dp"
             android:text="TextView"
-            android:textSize="24sp"
+            android:textColor="#000"
+            android:textSize="15sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/normal_tv2"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/guideline71"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/guideline34"
             app:layout_constraintTop_toTopOf="parent" />
@@ -63,10 +83,13 @@
             android:id="@+id/normal_tv2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
             android:text="TextView"
+            android:textSize="13sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/normal_tv1"
             app:layout_constraintTop_toBottomOf="@+id/normal_tv1" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -82,12 +105,23 @@
             android:id="@+id/LatInvisiable"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:paddingLeft="30dp"
-            android:paddingRight="15dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/view5"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="#DDD"
+            app:layout_constraintBottom_toBottomOf="@+id/LatInvisiable"
+            app:layout_constraintEnd_toEndOf="@+id/LatInvisiable"
+            app:layout_constraintStart_toStartOf="@+id/LatInvisiable"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.Guideline
@@ -95,6 +129,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.8" />
+        app:layout_constraintGuide_percent="0.85" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

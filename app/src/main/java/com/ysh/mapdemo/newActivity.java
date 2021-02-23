@@ -2,6 +2,7 @@ package com.ysh.mapdemo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.fragment.app.FragmentManager;
@@ -13,9 +14,12 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import android.content.Intent;
 import android.icu.util.BuddhistCalendar;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.ysh.mapdemo.newFragment.FirstFragment;
@@ -27,6 +31,7 @@ public class newActivity extends AppCompatActivity {
     MotionLayout homeLayout;
     MotionLayout searchLayout;
     MotionLayout userLayout;
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +61,10 @@ public class newActivity extends AppCompatActivity {
 //        fragmentTransaction.replace(R.id.framelayout,fragment);
 //        fragmentTransaction.commit();
 
-
+        Window window = getWindow();
+        WindowManager.LayoutParams params = window.getAttributes();
+        params.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE;
+        window.setAttributes(params);
         NavHostFragment navHostFragment =
                 (NavHostFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.fragment);
@@ -109,7 +117,8 @@ public class newActivity extends AppCompatActivity {
                 }
             }
         });
-        navController.navigate(R.id.secondFragment);
+//        navController.navigate(R.id.secondFragment);
+//        navController.navigate(R.id.thirdFragment);
         Intent intent = getIntent();
         if(intent==null){
 

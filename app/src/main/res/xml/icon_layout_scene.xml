@@ -47,6 +47,12 @@
             <CustomAttribute
                 motion:attributeName="textColor"
                 motion:customColorValue="#8a8a8a" />
+            <CustomAttribute
+                motion:attributeName="textSize"
+                motion:customFloatValue="12" />
+            <CustomAttribute
+                motion:attributeName="textAppearance"
+                motion:customIntegerValue="1" />
         </Constraint>
     </ConstraintSet>
 

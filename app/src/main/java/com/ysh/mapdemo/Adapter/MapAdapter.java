@@ -8,6 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ysh.mapdemo.Bean.AddressBean;
@@ -74,7 +75,7 @@ public class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder>{
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView mMapname,mMapcontent;
-        private final RelativeLayout relay;
+        private final ConstraintLayout relay;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -86,7 +87,6 @@ public class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder>{
                 @Override
                 public void onClick(View v) {
                     if (monItemClickListener!=null){
-
                         monItemClickListener.onItemClick(getAdapterPosition(),list);
                     }
                 }

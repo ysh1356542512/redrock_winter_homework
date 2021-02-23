@@ -1,9 +1,11 @@
 package com.ysh.mapdemo.newFragment;
 
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -24,6 +26,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.Switch;
@@ -31,9 +35,13 @@ import android.widget.Switch;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.ysh.mapdemo.Adapter.NormalAdapter;
+import com.ysh.mapdemo.Bean.normalBean;
+import com.ysh.mapdemo.FirstFragmentActivity;
+import com.ysh.mapdemo.Interface.OnNormalItemClickListener;
 import com.ysh.mapdemo.R;
 import com.ysh.mapdemo.Room.PoiPlace;
 import com.ysh.mapdemo.Room.PoiPlaceViewModel;
+import com.ysh.mapdemo.newActivity;
 
 import java.util.List;
 
@@ -54,6 +62,8 @@ public class SecondFragment extends Fragment {
     private LiveData<List<PoiPlace>> filterdPoiPlaces;
     private List<PoiPlace> allPoiPlaces;
     private DividerItemDecoration dividerItemDecoration;
+    private Button mBtnCancel,mBtnChange,mBtnClear;
+    private Boolean isChange;
 
     public SecondFragment() {
         // Required empty public constructor
@@ -92,12 +102,14 @@ public class SecondFragment extends Fragment {
         normalAdapter = new NormalAdapter(false,poiPlaceViewModel);
         cardAdapter = new NormalAdapter(true,poiPlaceViewModel);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        aSwitch = getView().findViewById(R.id.switch1);
         recyclerView.setAdapter(normalAdapter);
         constraintLayout1 = getView().findViewById(R.id.second_cnt_1);
         constraintLayout2 = getView().findViewById(R.id.second_cnt_2);
         mIBtnMenu = getView().findViewById(R.id.second_ibtn_menu);
         constraintLayout2.setVisibility(View.GONE);
+        mBtnCancel = getView().findViewById(R.id.second_setting1_cancel);
+        mBtnChange = getView().findViewById(R.id.second_setting1_change);
+        mBtnClear = getView().findViewById(R.id.second_setting1_clear);
         dividerItemDecoration = new DividerItemDecoration(requireActivity(),DividerItemDecoration.VERTICAL);
         mIBtnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,19 +118,21 @@ public class SecondFragment extends Fragment {
                 constraintLayout2.setVisibility(View.VISIBLE);
             }
         });
-        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    recyclerView.setAdapter(cardAdapter);
-                    recyclerView.removeItemDecoration(dividerItemDecoration);
-                }else{
-                    recyclerView.setAdapter(normalAdapter);
-                    recyclerView.addItemDecoration(dividerItemDecoration);
-                }
-            }
-        });
+//        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                if(isChecked){
+//                    recyclerView.setAdapter(cardAdapter);
+//                    recyclerView.removeItemDecoration(dividerItemDecoration);
+//                }else{
+//                    recyclerView.setAdapter(normalAdapter);
+//                    recyclerView.addItemDecoration(dividerItemDecoration);
+//                }
+//            }
+//        });
+
         filterdPoiPlaces = poiPlaceViewModel.getAllPoiPlaceLive();
+
         filterdPoiPlaces.observe(getViewLifecycleOwner(), new Observer<List<PoiPlace>>() {
             @Override
             public void onChanged(List<PoiPlace> poiPlaces) {
@@ -133,6 +147,30 @@ public class SecondFragment extends Fragment {
                     normalAdapter.submitList(poiPlaces);
                     cardAdapter.submitList(poiPlaces);
                 }
+            }
+        });
+        mBtnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                constraintLayout1.setAlpha((float) 1.0);
+                constraintLayout2.setVisibility(View.GONE);
+            }
+        });
+        isChange = false;
+        mBtnChange.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isChange){
+                    recyclerView.setAdapter(cardAdapter);
+                    recyclerView.removeItemDecoration(dividerItemDecoration);
+                    isChange=true;
+                }else{
+                    recyclerView.setAdapter(normalAdapter);
+                    recyclerView.addItemDecoration(dividerItemDecoration);
+                    isChange=false;
+                }
+                constraintLayout1.setAlpha((float) 1.0);
+                constraintLayout2.setVisibility(View.GONE);
             }
         });
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.START|ItemTouchHelper.END) {
@@ -197,10 +235,30 @@ public class SecondFragment extends Fragment {
                 icon.draw(c);
             }
         }).attachToRecyclerView(recyclerView);
+        normalAdapter.setNormalItemClickListener(new OnNormalItemClickListener() {
+            @Override
+            public void onItemClick(int Position) {
+                Intent intent = new Intent(requireActivity(), newActivity.class);
+                normalBean.lat = filterdPoiPlaces.getValue().get(Position).getLat();
+                normalBean.lon = filterdPoiPlaces.getValue().get(Position).getLon();
+                startActivity(intent);
+            }
+        });
+        cardAdapter.setNormalItemClickListener(new OnNormalItemClickListener() {
+            @Override
+            public void onItemClick(int Position) {
+                Intent intent = new Intent(requireActivity(), newActivity.class);
+                normalBean.lat = filterdPoiPlaces.getValue().get(Position).getLat();
+                normalBean.lon = filterdPoiPlaces.getValue().get(Position).getLon();
+                startActivity(intent);
+            }
+        });
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                poiPlaceViewModel.insertPoiPlaces(new PoiPlace("标题一","地址一",0,0));
+                poiPlaceViewModel.insertPoiPlaces(new PoiPlace("标题二","地址二",0,0));
+                poiPlaceViewModel.insertPoiPlaces(new PoiPlace("标题三","地址三",0,0));
             }
         });
 

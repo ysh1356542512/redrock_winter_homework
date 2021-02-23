@@ -4,7 +4,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="firstFragment_title">首页</string>
-    <string name="secondFragment_title">附近</string>
+    <string name="secondFragment_title">收藏夹</string>
     <string name="thirdFragment_title">我的</string>
     <string name="amap_home_icon">首页</string>
     <string name="third_third_textView">我的订单</string>
@@ -29,4 +29,15 @@
     <string name="third_forth_title">高德推荐</string>
     <string name="first_btn_route">路线</string>
     <string name="first_btn_add">新增</string>
+    <string name="first_zhoubian">周边</string>
+    <string name="first_star">收藏</string>
+    <string name="first_share">分享</string>
+    <string name="first_car">打车</string>
+    <string name="first_search_tv">查找地点、公交、地铁</string>
+    <string name="firts_act_search">搜索</string>
+    <string name="iBn_cha">取消</string>
+    <string name="third_forth_act">活动多多</string>
+    <string name="second_tv_1">收藏的点</string>
+    <string name="second_tv_2">收藏路线</string>
+    <string name="second_tv_3">收藏视频</string>
 </resources>
